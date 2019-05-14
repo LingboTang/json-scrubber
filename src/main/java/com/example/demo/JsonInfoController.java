@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import com.google.gson.Gson;
 
 import java.io.*;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
@@ -28,9 +30,8 @@ public class JsonInfoController {
     public static final Pattern VALID_PHONENUMBER_REGEX =
             Pattern.compile("^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]\\d{3}[\\s.-]\\d{4}$", Pattern.CASE_INSENSITIVE);
 
-    //private static String[] validKeyArray = {"firstName", "lastName", "email", "password", "phoneNumber", "dateOfBirth"};
+    public final static String DATE_FORMAT = "yyyy-MM-dd";
 
-    //private static List<String> validKeyList = Arrays.asList(validKeyArray);
 
     @RequestMapping(value="/scrub_json", method=RequestMethod.POST, consumes="application/json", produces="application/json")
     public ResponseEntity<BusinessData> scrubJsonInfo(@RequestBody Map<String, String> body) throws JSONException {
@@ -88,6 +89,9 @@ public class JsonInfoController {
                 }
             }
             else if (entry.getKey() == "dateOfBirth") {
+                if (!validateDateOfBirth(entry.getValue())) {
+                    errorMessage = "Invalid Date of Birth!";
+                }
                 dateOfBirth = entry.getValue();
             }
             else {
@@ -126,6 +130,12 @@ public class JsonInfoController {
     public static boolean validatePhoneNumnber(String phoneNumberStr) {
         Matcher matcher = VALID_PHONENUMBER_REGEX.matcher(phoneNumberStr);
         return matcher.find();
+    }
+
+    public static boolean validateDateOfBirth(String dateOfBirth) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        sdf.setLenient(false);
+        return sdf.parse(dateOfBirth, new ParsePosition(0)) != null;
     }
 
 

@@ -1,46 +1,24 @@
 package com.example.demo;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.matchers.Times;
-import org.mockserver.model.Header;
-import org.mockserver.verify.VerificationTimes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.client.ExpectedCount;
-import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.web.client.RestTemplate;
-import org.yaml.snakeyaml.scanner.ScannerImpl;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -64,11 +42,18 @@ public class JsonInfoControllerTest {
         }
     }
 
+    /*@Test
+    public void scrubJsonInfoFailureAPITest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post("/scrub_json")
+                .content(asJsonString(new BusinessData("Test", "Test", "test@@@test.org", "2355Ab@", "780-000-dfdfa0000", "1990-01-01")))
+                .characterEncoding("utf-8")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }*/
+
     @Test
     public void scrubJsonInfoSuccessAPITest() throws Exception {
-        String dateString = "1990-01-01";
-        Date testDate = new SimpleDateFormat("yyyy-MM-dd").parse(dateString);
-        //String validRequestJson = "{\"firstName\": \"Test\", \"lastName\": \"Test\", \"email\": \"test@test.org\", \"password\": \"PAAssWord\", \"phoneNumber\": \"780-000-0000\", \"dateOfBirth\": \"1991-01-01\"}";
         mvc.perform(MockMvcRequestBuilders.post("/scrub_json")
                 .content(asJsonString(new BusinessData("Test", "Test", "test@test.org", "2355Ab@kk", "780-000-0000", "1990-01-01")))
                 .characterEncoding("utf-8")
@@ -124,6 +109,16 @@ public class JsonInfoControllerTest {
         assertTrue(JsonInfoController.validatePhoneNumnber(testValidPhoneNumber_4));
         assertTrue(JsonInfoController.validatePhoneNumnber(testValidPhoneNumber_5));
         assertFalse(JsonInfoController.validatePhoneNumnber(testInvalidPhoneNumber));
+    }
+
+    @Test
+    public void validateDateOfBirthTest() throws Exception {
+        String testValidDateOfBirth = "1990-01-01";
+        String testInvalidDateOfBirth = "01-01-1990";
+
+
+        assertTrue(JsonInfoController.validateDateOfBirth(testValidDateOfBirth));
+        assertFalse(JsonInfoController.validateDateOfBirth(testInvalidDateOfBirth));
     }
 
     @Test
