@@ -44,8 +44,14 @@ public class JsonInfoControllerTest {
 
     @Test
     public void scrubJsonInfoFailureAPITest() throws Exception {
+        //I Modified after 4pm, 2019-05-14 just for personal interest
+        BusinessData businessData_1 = new BusinessData("Test", "Test", "test@@@test.org", "2355Ab@", "780-000-dfdfa0000", "1990-01-01");
+        BusinessData businessData_2 = new BusinessData("Test", "Test", "test@test.org", "2355Ab@kk", "780-000-0000", "1990-01-01");
+        ArrayList<BusinessData> businessDataList = new ArrayList<BusinessData>();
+        businessDataList.add(businessData_1);
+        businessDataList.add(businessData_2);
         mvc.perform(MockMvcRequestBuilders.post("/scrub_json")
-                .content(asJsonString(new BusinessData("Test", "Test", "test@@@test.org", "2355Ab@", "780-000-dfdfa0000", "1990-01-01")))
+                .content(asJsonString(businessDataList))
                 .characterEncoding("utf-8")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -54,8 +60,14 @@ public class JsonInfoControllerTest {
 
     @Test
     public void scrubJsonInfoSuccessAPITest() throws Exception {
+        //I Modified after 4pm, 2019-05-14 just for personal interest
+        BusinessData businessData_1 = new BusinessData("Test", "Test", "test@test.org", "2355Ab@cc", "780-000-0001", "1990-01-01");
+        BusinessData businessData_2 = new BusinessData("Test2", "Test2", "test@test2.org", "2355Ab@kk", "780-000-0002", "1990-01-01");
+        ArrayList<BusinessData> businessDataList = new ArrayList<BusinessData>();
+        businessDataList.add(businessData_1);
+        businessDataList.add(businessData_2);
         mvc.perform(MockMvcRequestBuilders.post("/scrub_json")
-                .content(asJsonString(new BusinessData("Test", "Test", "test@test.org", "2355Ab@kk", "780-000-0000", "1990-01-01")))
+                .content(asJsonString(businessDataList))
                 .characterEncoding("utf-8")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
