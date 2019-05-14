@@ -1,5 +1,8 @@
 package com.example.demo;
 
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,18 +21,22 @@ import java.util.Map;
 public class JsonInfoController {
 
     @RequestMapping(value="/scrub_json", method= RequestMethod.POST, consumes="application/json", produces="application/json")
-    public String scrubJsonInfo(@RequestBody Map<String, String> body) {
+    public ResponseEntity<BusinessData> scrubJsonInfo(@RequestBody Map<String, String> body) throws JSONException {
+
+        // Initialize fields which needs to go into the scrubbing process.
         String firstName = "";
         String lastName = "";
         String email = "";
         String passWord = "";
         String phoneNumber = "";
-        Date dateOfBirth = new Date();
+        String dateOfBirth = "";
+
+        // Parsing the json by a Map
         for (Map.Entry<String, String> entry: body.entrySet()) {
-            if (entry.getKey() == "first_name") {
+            if (entry.getKey() == "firstName") {
                 firstName = entry.getValue();
             }
-            else if (entry.getKey() == "last_name") {
+            else if (entry.getKey() == "lastName") {
                 lastName = entry.getValue();
             }
             else if (entry.getKey() == "email") {
@@ -38,40 +45,64 @@ public class JsonInfoController {
             else if (entry.getKey() == "password") {
                 passWord = entry.getValue();
             }
-            else if (entry.getKey() == "phone_number") {
+            else if (entry.getKey() == "phoneNumber") {
                 phoneNumber = entry.getValue();
             }
-            else if (entry.getKey() == "date_of_birth") {
-                String dateOfBirthString = entry.getValue();
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                ParsePosition position = new ParsePosition(0);
-                dateOfBirth = formatter.parse(dateOfBirthString, position);
+            else if (entry.getKey() == "dateOfBirth") {
+                dateOfBirth = entry.getValue();
             }
         }
+
+        // Construct Business data object
         BusinessData businessData = new BusinessData(firstName, lastName, email, passWord, phoneNumber, dateOfBirth);
+
+        // Construct Json Metadata (for logging)
         JsonInfo jsonInfo = new JsonInfo();
-        Gson gson = new Gson();
-        ZonedDateTime logDate = ZonedDateTime.now();
+
+        // Construct Json serializer for output
+        //Gson gson = new Gson();
+
+        // Format time
+        ZonedDateTime logDate = jsonInfo.getLogDate();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy - HH:mm:ss.SSSSSS Z");
         String formattedTimeString = logDate.format(formatter);
 
         String dirPath = "output.txt";
-        File outputPath = new File(dirPath);
-        String str = "Hello";
 
         Writer writer = null;
         try {
             writer = new BufferedWriter(new OutputStreamWriter(
                     new FileOutputStream(dirPath), "utf-8"));
-            writer.write(jsonInfo.getUUID() + formattedTimeString + "\n");
+            String metadataLine = jsonInfo.getUUID() + " " + formattedTimeString + "\n";
+            writer.write(metadataLine);
+            String scrubbedBusinessData = scrubbingBusinessData(businessData);
+            writer.write(scrubbedBusinessData);
+
+
         } catch (IOException ex) {
             // Report
+            ex.printStackTrace();
         } finally {
-            try {writer.close();} catch (Exception ex) {/*ignore*/}
+            try {
+                writer.close();
+            }
+            catch (Exception ex) {
+                /*ignore*/
+            }
         }
 
-        String jsonMetadata = gson.toJson(businessData);
-        return jsonMetadata;
+        //String jsonData = gson.toJson(businessData);
+        return new ResponseEntity<BusinessData>(businessData, HttpStatus.OK);
+    }
+
+    private String scrubbingBusinessData(BusinessData businessData) {
+        String scrubbedText = "";
+        String scrubbedFirstName = "firstName" + ": " + businessData.getFirstName() + "\n";
+        String scrubbedEmail = "email" + ": " + businessData.getEmail() + "\n";
+        String scrubbedPassword = "password" + ": "  + businessData.getPassword() + "\n";
+        String scrubbedPhoneNumber = "phoneNumber" + ": " + businessData.getPhoneNumber() + "\n";
+        scrubbedText = scrubbedText + scrubbedFirstName + scrubbedEmail + scrubbedPassword + scrubbedPhoneNumber + "\n";
+        return scrubbedText;
     }
 
 }
