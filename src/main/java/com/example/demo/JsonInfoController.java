@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import com.google.gson.Gson;
 
+import java.io.*;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
@@ -53,6 +54,22 @@ public class JsonInfoController {
         ZonedDateTime logDate = ZonedDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy - HH:mm:ss.SSSSSS Z");
         String formattedTimeString = logDate.format(formatter);
+
+        String dirPath = "output.txt";
+        File outputPath = new File(dirPath);
+        String str = "Hello";
+
+        Writer writer = null;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(dirPath), "utf-8"));
+            writer.write(jsonInfo.getUUID() + formattedTimeString + "\n");
+        } catch (IOException ex) {
+            // Report
+        } finally {
+            try {writer.close();} catch (Exception ex) {/*ignore*/}
+        }
+
         String jsonMetadata = gson.toJson(businessData);
         return jsonMetadata;
     }
