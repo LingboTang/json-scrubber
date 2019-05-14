@@ -17,10 +17,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 
+
 @RestController
 public class JsonInfoController {
 
-    @RequestMapping(value="/scrub_json", method= RequestMethod.POST, consumes="application/json", produces="application/json")
+    @RequestMapping(value="/scrub_json", method=RequestMethod.POST, consumes="application/json", produces="application/json")
     public ResponseEntity<BusinessData> scrubJsonInfo(@RequestBody Map<String, String> body) throws JSONException {
 
         // Initialize fields which needs to go into the scrubbing process.
@@ -59,9 +60,6 @@ public class JsonInfoController {
         // Construct Json Metadata (for logging)
         JsonInfo jsonInfo = new JsonInfo();
 
-        // Construct Json serializer for output
-        //Gson gson = new Gson();
-
         // Format time
         ZonedDateTime logDate = jsonInfo.getLogDate();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy - HH:mm:ss.SSSSSS Z");
@@ -91,7 +89,6 @@ public class JsonInfoController {
             }
         }
 
-        //String jsonData = gson.toJson(businessData);
         return new ResponseEntity<BusinessData>(businessData, HttpStatus.OK);
     }
 
