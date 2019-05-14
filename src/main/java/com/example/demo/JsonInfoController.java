@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.google.gson.Gson;
 
+import javax.validation.ValidationException;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -34,7 +35,7 @@ public class JsonInfoController {
 
 
     @RequestMapping(value="/scrub_json", method=RequestMethod.POST, consumes="application/json", produces="application/json")
-    public ResponseEntity<BusinessData> scrubJsonInfo(@RequestBody Map<String, String> body) throws JSONException {
+    public ResponseEntity<BusinessData> scrubJsonInfo(@RequestBody Map<String, String> body) throws Exception {
 
         // Initialize fields which needs to go into the scrubbing process.
         String firstName = "";
@@ -50,6 +51,7 @@ public class JsonInfoController {
             if (entry.getKey() == "firstName") {
                 if(!Pattern.matches(".*[a-zA-Z]+.*", entry.getValue())) {
                     errorMessage = "Invalid First Name!";
+                    throw new ValidationException(errorMessage);
                 }
                 else {
                     firstName = entry.getValue();
@@ -58,6 +60,7 @@ public class JsonInfoController {
             else if (entry.getKey() == "lastName") {
                 if(!Pattern.matches(".*[a-zA-Z]+.*", entry.getValue())) {
                     errorMessage = "Invalid Last Name!";
+                    throw new ValidationException(errorMessage);
                 }
                 else {
                     lastName = entry.getValue();
@@ -66,6 +69,7 @@ public class JsonInfoController {
             else if (entry.getKey() == "email") {
                 if (!validateEmail(entry.getValue())) {
                     errorMessage = "Invalid email!";
+                    throw new ValidationException(errorMessage);
                 }
                 else {
                     email = entry.getValue();
@@ -74,7 +78,7 @@ public class JsonInfoController {
             else if (entry.getKey() == "password") {
                 if (!validatePassword(entry.getValue())) {
                     errorMessage = "Invalid password!";
-                    System.out.println("Invalid password!");
+                    throw new ValidationException(errorMessage);
                 }
                 else {
                     passWord = entry.getValue();
@@ -83,6 +87,7 @@ public class JsonInfoController {
             else if (entry.getKey() == "phoneNumber") {
                 if (!validatePhoneNumnber(entry.getValue())) {
                     errorMessage = "Invalid Phone Number!";
+                    throw new ValidationException(errorMessage);
                 }
                 else {
                     phoneNumber = entry.getValue();
@@ -91,11 +96,13 @@ public class JsonInfoController {
             else if (entry.getKey() == "dateOfBirth") {
                 if (!validateDateOfBirth(entry.getValue())) {
                     errorMessage = "Invalid Date of Birth!";
+                    throw new ValidationException(errorMessage);
                 }
                 dateOfBirth = entry.getValue();
             }
             else {
                 errorMessage = entry.getKey() + " is invalid";
+                throw new ValidationException(errorMessage);
             }
         }
 

@@ -42,15 +42,15 @@ public class JsonInfoControllerTest {
         }
     }
 
-    /*@Test
+    @Test
     public void scrubJsonInfoFailureAPITest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.post("/scrub_json")
                 .content(asJsonString(new BusinessData("Test", "Test", "test@@@test.org", "2355Ab@", "780-000-dfdfa0000", "1990-01-01")))
                 .characterEncoding("utf-8")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }*/
+                .andExpect(status().is5xxServerError());
+    }
 
     @Test
     public void scrubJsonInfoSuccessAPITest() throws Exception {
