@@ -3,9 +3,9 @@ package com.example.demo;
 public class CustomizedErrorMessage {
 
     private String statusCode;
-    private Exception errorMessage;
+    private String errorMessage;
 
-    public CustomizedErrorMessage(Integer statusCode, Exception errorMessage) {
+    public CustomizedErrorMessage(Integer statusCode, String errorMessage) {
         this.statusCode = statusCode.toString();
         this.errorMessage = errorMessage;
     }
@@ -14,7 +14,7 @@ public class CustomizedErrorMessage {
         return statusCode;
     }
 
-    public Exception getErrorMessage() {
+    public String getErrorMessage() {
         return errorMessage;
     }
 }
