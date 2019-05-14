@@ -21,10 +21,6 @@ public class CustomErrorController implements ErrorController {
         Gson gson = new Gson();
 
         return gson.toJson(customizedErrorMessage);
-
-        /*return String.format("<html><body><h2>Sample Error Page</h2><div>Status code: <b>%s</b></div>"
-                        + "<div>Exception Message: <b>%s</b></div><body></html>",
-                statusCode, exception==null? "N/A": exception.getMessage());*/
     }
 
     @Override
