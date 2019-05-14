@@ -67,10 +67,26 @@ public class JsonInfoController {
 
         String dirPath = "output.txt";
 
+        writeToFile(dirPath, jsonInfo, formattedTimeString, businessData);
+
+        return new ResponseEntity<BusinessData>(businessData, HttpStatus.OK);
+    }
+
+    private static String scrubbingBusinessData(BusinessData businessData) {
+        String scrubbedText = "";
+        String scrubbedFirstName = "firstName" + ": " + businessData.getFirstName() + "\n";
+        String scrubbedEmail = "email" + ": " + businessData.getEmail() + "\n";
+        String scrubbedPassword = "password" + ": "  + businessData.getPassword() + "\n";
+        String scrubbedPhoneNumber = "phoneNumber" + ": " + businessData.getPhoneNumber() + "\n";
+        scrubbedText = scrubbedText + scrubbedFirstName + scrubbedEmail + scrubbedPassword + scrubbedPhoneNumber + "\n";
+        return scrubbedText;
+    }
+
+    public static void writeToFile(String filePath, JsonInfo jsonInfo, String formattedTimeString, BusinessData businessData) {
         Writer writer = null;
         try {
             writer = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(dirPath), "utf-8"));
+                    new FileOutputStream(filePath), "utf-8"));
             String metadataLine = jsonInfo.getUUID() + " " + formattedTimeString + "\n";
             writer.write(metadataLine);
             String scrubbedBusinessData = scrubbingBusinessData(businessData);
@@ -88,18 +104,6 @@ public class JsonInfoController {
                 /*ignore*/
             }
         }
-
-        return new ResponseEntity<BusinessData>(businessData, HttpStatus.OK);
-    }
-
-    private String scrubbingBusinessData(BusinessData businessData) {
-        String scrubbedText = "";
-        String scrubbedFirstName = "firstName" + ": " + businessData.getFirstName() + "\n";
-        String scrubbedEmail = "email" + ": " + businessData.getEmail() + "\n";
-        String scrubbedPassword = "password" + ": "  + businessData.getPassword() + "\n";
-        String scrubbedPhoneNumber = "phoneNumber" + ": " + businessData.getPhoneNumber() + "\n";
-        scrubbedText = scrubbedText + scrubbedFirstName + scrubbedEmail + scrubbedPassword + scrubbedPhoneNumber + "\n";
-        return scrubbedText;
     }
 
 }

@@ -27,6 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -49,34 +51,8 @@ public class JsonInfoControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @Autowired
-    private RestTemplate restTemplate;
-
     @MockBean
     private JsonInfoController jsonInfoController;
-
-    @Test
-    public void scrubJsonInfoAPITest() throws Exception {
-        String dateString = "1990-01-01";
-        Date testDate = new SimpleDateFormat("yyyy-MM-dd").parse(dateString);
-        String validRequestJson = "{\"firstName\": \"Test\", \"lastName\": \"Test\", \"email\": \"test@test.org\", \"password\": \"PAAssWord\", \"phoneNumber\": \"780-000-0000\", \"dateOfBirth\": \"1991-01-01\"}";
-        new MockServerClient("127.0.0.1", 1080).when(
-                request()
-                        .withMethod("POST")
-                        .withPath("/scrub_json")
-                        .withHeader("\"Content-type\", \"application/json\"")
-                        .withHeader("\"Accept\", \"application/json\"")
-                        .withBody(validRequestJson),
-                         Times.exactly(1)).respond(
-                response()
-                        .withStatusCode(200)
-                        .withHeaders(
-                                new Header("Content-Type", "application/json; charset=utf-8"),
-                                new Header("Cache-Control", "public, max-age=86400"))
-                        .withBody("{ message: 'incorrect username and password combination' }")
-                        .withDelay(TimeUnit.SECONDS,1)
-        );
-    }
 
     public static String asJsonString(final Object obj) {
         try {
@@ -88,9 +64,30 @@ public class JsonInfoControllerTest {
         }
     }
 
-    /*public void scrubJsonInfo() throws Exception {
+    @Test
+    public void scrubJsonInfoAPITest() throws Exception {
+        String dateString = "1990-01-01";
+        Date testDate = new SimpleDateFormat("yyyy-MM-dd").parse(dateString);
+        String validRequestJson = "{\"firstName\": \"Test\", \"lastName\": \"Test\", \"email\": \"test@test.org\", \"password\": \"PAAssWord\", \"phoneNumber\": \"780-000-0000\", \"dateOfBirth\": \"1991-01-01\"}";
+    }
 
-        File file = new File("output.txt");
+    @Test
+    public void writeToFileTest() throws Exception {
+
+        String filePath = "output.txt";
+
+        File file = new File(filePath);
+
+        JsonInfo jsonInfo = new JsonInfo();
+
+        ZonedDateTime logDate = jsonInfo.getLogDate();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy - HH:mm:ss.SSSSSS Z");
+        String formattedTimeString = logDate.format(formatter);
+
+        BusinessData businessData = new BusinessData("Test", "Test", "test@test.org", "PAAssWord", "780-000-0000", "1991-01-01");
+
+        JsonInfoController.writeToFile(filePath, jsonInfo, formattedTimeString, businessData);
+
         Scanner sc = new Scanner(file);
         List<String> lineContent = new ArrayList<String>();
 
@@ -99,11 +96,33 @@ public class JsonInfoControllerTest {
             lineContent.add(currentLine);
         }
 
-        for (String line: lineContent) {
-            System.out.println(line);
+        assertEquals(lineContent.size(), 6);
+
+        for (int i = 1; i < lineContent.size()-1; i++) {
+            String[] mapPair = lineContent.get(i).split(": ");
+            for (int j = 0; j < mapPair.length; j++) {
+                String key = mapPair[0];
+                String value = mapPair[1];
+                if (i == 1) {
+                    assertEquals(key, "firstName");
+                    assertEquals(value, "Test");
+                }
+                else if (i == 2) {
+                    assertEquals(key, "email");
+                    assertEquals(value, "test@test.org");
+                }
+                else if (i == 3) {
+                    assertEquals(key, "password");
+                    assertEquals(value, "PAAssWord");
+                }
+                else if (i == 4) {
+                    assertEquals(key, "phoneNumber");
+                    assertEquals(value, "780-000-0000");
+                }
+            }
         }
 
 
-    }*/
+    }
 
 }
