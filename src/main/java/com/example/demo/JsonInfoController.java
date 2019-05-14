@@ -3,10 +3,7 @@ package com.example.demo;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.google.gson.Gson;
 
 import java.io.*;
@@ -14,12 +11,26 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @RestController
 public class JsonInfoController {
+
+    public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
+            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
+    public static final Pattern VALID_PASSWORD_REGEX =
+            Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$", Pattern.CASE_INSENSITIVE);
+
+    public static final Pattern VALID_PHONENUMBER_REGEX =
+            Pattern.compile("^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]\\d{3}[\\s.-]\\d{4}$", Pattern.CASE_INSENSITIVE);
+
+    //private static String[] validKeyArray = {"firstName", "lastName", "email", "password", "phoneNumber", "dateOfBirth"};
+
+    //private static List<String> validKeyList = Arrays.asList(validKeyArray);
 
     @RequestMapping(value="/scrub_json", method=RequestMethod.POST, consumes="application/json", produces="application/json")
     public ResponseEntity<BusinessData> scrubJsonInfo(@RequestBody Map<String, String> body) throws JSONException {
@@ -31,26 +42,55 @@ public class JsonInfoController {
         String passWord = "";
         String phoneNumber = "";
         String dateOfBirth = "";
+        String errorMessage = "";
 
         // Parsing the json by a Map
         for (Map.Entry<String, String> entry: body.entrySet()) {
             if (entry.getKey() == "firstName") {
-                firstName = entry.getValue();
+                if(!Pattern.matches(".*[a-zA-Z]+.*", entry.getValue())) {
+                    errorMessage = "Invalid First Name!";
+                }
+                else {
+                    firstName = entry.getValue();
+                }
             }
             else if (entry.getKey() == "lastName") {
-                lastName = entry.getValue();
+                if(!Pattern.matches(".*[a-zA-Z]+.*", entry.getValue())) {
+                    errorMessage = "Invalid Last Name!";
+                }
+                else {
+                    lastName = entry.getValue();
+                }
             }
             else if (entry.getKey() == "email") {
-                email = entry.getValue();
+                if (!validateEmail(email)) {
+                    errorMessage = "Invalid email!";
+                }
+                else {
+                    email = entry.getValue();
+                }
             }
             else if (entry.getKey() == "password") {
-                passWord = entry.getValue();
+                if (!validateEmail(email)) {
+                    errorMessage = "Invalid password!";
+                }
+                else {
+                    passWord = entry.getValue();
+                }
             }
             else if (entry.getKey() == "phoneNumber") {
-                phoneNumber = entry.getValue();
+                if (!validateEmail(email)) {
+                    errorMessage = "Invalid Phone Number!";
+                }
+                else {
+                    phoneNumber = entry.getValue();
+                }
             }
             else if (entry.getKey() == "dateOfBirth") {
                 dateOfBirth = entry.getValue();
+            }
+            else {
+                errorMessage = entry.getKey() + " is invalid";
             }
         }
 
@@ -71,6 +111,22 @@ public class JsonInfoController {
 
         return new ResponseEntity<BusinessData>(businessData, HttpStatus.OK);
     }
+
+    public static boolean validateEmail(String emailStr) {
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(emailStr);
+        return matcher.find();
+    }
+
+    public static boolean validatePassword(String pwdStr) {
+        Matcher matcher = VALID_PASSWORD_REGEX.matcher(pwdStr);
+        return matcher.find();
+    }
+
+    public static boolean validatePhoneNumnber(String phoneNumberStr) {
+        Matcher matcher = VALID_PHONENUMBER_REGEX.matcher(phoneNumberStr);
+        return matcher.find();
+    }
+
 
     private static String scrubbingBusinessData(BusinessData businessData) {
         String scrubbedText = "";
