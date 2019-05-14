@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+
 @RunWith(SpringRunner.class)
 @WebMvcTest(JsonInfoController.class)
 public class JsonInfoControllerTest {
@@ -44,13 +45,16 @@ public class JsonInfoControllerTest {
     public void scrubJsonInfoAPITest() throws Exception {
         String dateString = "1990-01-01";
         Date testDate = new SimpleDateFormat("yyyy-MM-dd").parse(dateString);
+        String validRequestJson = "{\"firstName\": \"Test\", \"lastName\": \"Test\", \"email\": \"test@test.org\", \"password\": \"PAAssWord\", \"phoneNumber\": \"780-000-0000\", \"dateOfBirth\": \"1991-01-01\"}";
         mvc.perform(MockMvcRequestBuilders.post("/scrub_json")
-                .content(asJsonString(new BusinessData("Test", "Test", "test@test.org", "PAAssWord", "780-000-0000", "1990-01-01")))
+                .content(validRequestJson)
                 .characterEncoding("utf-8")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.firstName").value("Test"));
+                .andDo(mvcResult -> {
+                    System.out.println(mvcResult.getResponse().getContentAsString());
+                });
     }
 
     public static String asJsonString(final Object obj) {
