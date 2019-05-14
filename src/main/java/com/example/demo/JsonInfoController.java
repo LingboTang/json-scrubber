@@ -35,93 +35,98 @@ public class JsonInfoController {
 
 
     @RequestMapping(value="/scrub_json", method=RequestMethod.POST, consumes="application/json", produces="application/json")
-    public ResponseEntity<BusinessData> scrubJsonInfo(@RequestBody Map<String, String> body) throws Exception {
+    public ResponseEntity<ArrayList<BusinessData>> scrubJsonInfo(@RequestBody ArrayList<Map<String, String>> body) throws Exception {
+
+        ArrayList<BusinessData> businessDataList = new ArrayList<BusinessData>();
 
         // Initialize fields which needs to go into the scrubbing process.
-        String firstName = "";
-        String lastName = "";
-        String email = "";
-        String passWord = "";
-        String phoneNumber = "";
-        String dateOfBirth = "";
-        String errorMessage = "";
+        for (Map<String, String> dataSet: body) {
+            String firstName = "";
+            String lastName = "";
+            String email = "";
+            String passWord = "";
+            String phoneNumber = "";
+            String dateOfBirth = "";
+            String errorMessage = "";
 
-        // Parsing the json by a Map
-        for (Map.Entry<String, String> entry: body.entrySet()) {
-            if (entry.getKey() == "firstName") {
-                if(!Pattern.matches(".*[a-zA-Z]+.*", entry.getValue())) {
-                    errorMessage = "Invalid First Name!";
-                    throw new ValidationException(errorMessage);
+            // Parsing the json by a Map
+            for (Map.Entry<String, String> entry: dataSet.entrySet()) {
+                if (entry.getKey() == "firstName") {
+                    if(!Pattern.matches(".*[a-zA-Z]+.*", entry.getValue())) {
+                        errorMessage = "Invalid First Name!";
+                        throw new ValidationException(errorMessage);
+                    }
+                    else {
+                        firstName = entry.getValue();
+                    }
+                }
+                else if (entry.getKey() == "lastName") {
+                    if(!Pattern.matches(".*[a-zA-Z]+.*", entry.getValue())) {
+                        errorMessage = "Invalid Last Name!";
+                        throw new ValidationException(errorMessage);
+                    }
+                    else {
+                        lastName = entry.getValue();
+                    }
+                }
+                else if (entry.getKey() == "email") {
+                    if (!validateEmail(entry.getValue())) {
+                        errorMessage = "Invalid email!";
+                        throw new ValidationException(errorMessage);
+                    }
+                    else {
+                        email = entry.getValue();
+                    }
+                }
+                else if (entry.getKey() == "password") {
+                    if (!validatePassword(entry.getValue())) {
+                        errorMessage = "Invalid password!";
+                        throw new ValidationException(errorMessage);
+                    }
+                    else {
+                        passWord = entry.getValue();
+                    }
+                }
+                else if (entry.getKey() == "phoneNumber") {
+                    if (!validatePhoneNumnber(entry.getValue())) {
+                        errorMessage = "Invalid Phone Number!";
+                        throw new ValidationException(errorMessage);
+                    }
+                    else {
+                        phoneNumber = entry.getValue();
+                    }
+                }
+                else if (entry.getKey() == "dateOfBirth") {
+                    if (!validateDateOfBirth(entry.getValue())) {
+                        errorMessage = "Invalid Date of Birth!";
+                        throw new ValidationException(errorMessage);
+                    }
+                    dateOfBirth = entry.getValue();
                 }
                 else {
-                    firstName = entry.getValue();
-                }
-            }
-            else if (entry.getKey() == "lastName") {
-                if(!Pattern.matches(".*[a-zA-Z]+.*", entry.getValue())) {
-                    errorMessage = "Invalid Last Name!";
+                    errorMessage = entry.getKey() + " is invalid";
                     throw new ValidationException(errorMessage);
                 }
-                else {
-                    lastName = entry.getValue();
-                }
             }
-            else if (entry.getKey() == "email") {
-                if (!validateEmail(entry.getValue())) {
-                    errorMessage = "Invalid email!";
-                    throw new ValidationException(errorMessage);
-                }
-                else {
-                    email = entry.getValue();
-                }
-            }
-            else if (entry.getKey() == "password") {
-                if (!validatePassword(entry.getValue())) {
-                    errorMessage = "Invalid password!";
-                    throw new ValidationException(errorMessage);
-                }
-                else {
-                    passWord = entry.getValue();
-                }
-            }
-            else if (entry.getKey() == "phoneNumber") {
-                if (!validatePhoneNumnber(entry.getValue())) {
-                    errorMessage = "Invalid Phone Number!";
-                    throw new ValidationException(errorMessage);
-                }
-                else {
-                    phoneNumber = entry.getValue();
-                }
-            }
-            else if (entry.getKey() == "dateOfBirth") {
-                if (!validateDateOfBirth(entry.getValue())) {
-                    errorMessage = "Invalid Date of Birth!";
-                    throw new ValidationException(errorMessage);
-                }
-                dateOfBirth = entry.getValue();
-            }
-            else {
-                errorMessage = entry.getKey() + " is invalid";
-                throw new ValidationException(errorMessage);
-            }
+
+            // Construct Business data object
+            BusinessData businessData = new BusinessData(firstName, lastName, email, passWord, phoneNumber, dateOfBirth);
+            businessDataList.add(businessData);
+
+            // Construct Json Metadata (for logging)
+            JsonInfo jsonInfo = new JsonInfo();
+
+            // Format time
+            ZonedDateTime logDate = jsonInfo.getLogDate();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy - HH:mm:ss.SSSSSS Z");
+            String formattedTimeString = logDate.format(formatter);
+
+            String dirPath = "output.txt";
+
+            writeToFile(dirPath, jsonInfo, formattedTimeString, businessData);
         }
 
-        // Construct Business data object
-        BusinessData businessData = new BusinessData(firstName, lastName, email, passWord, phoneNumber, dateOfBirth);
-
-        // Construct Json Metadata (for logging)
-        JsonInfo jsonInfo = new JsonInfo();
-
-        // Format time
-        ZonedDateTime logDate = jsonInfo.getLogDate();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy - HH:mm:ss.SSSSSS Z");
-        String formattedTimeString = logDate.format(formatter);
-
-        String dirPath = "output.txt";
-
-        writeToFile(dirPath, jsonInfo, formattedTimeString, businessData);
-
-        return new ResponseEntity<BusinessData>(businessData, HttpStatus.OK);
+        return new ResponseEntity<ArrayList<BusinessData>>(businessDataList, HttpStatus.OK);
     }
 
     public static boolean validateEmail(String emailStr) {
