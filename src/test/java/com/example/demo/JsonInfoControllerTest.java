@@ -68,9 +68,9 @@ public class JsonInfoControllerTest {
     public void scrubJsonInfoSuccessAPITest() throws Exception {
         String dateString = "1990-01-01";
         Date testDate = new SimpleDateFormat("yyyy-MM-dd").parse(dateString);
-        String validRequestJson = "{\"firstName\": \"Test\", \"lastName\": \"Test\", \"email\": \"test@test.org\", \"password\": \"PAAssWord\", \"phoneNumber\": \"780-000-0000\", \"dateOfBirth\": \"1991-01-01\"}";
+        //String validRequestJson = "{\"firstName\": \"Test\", \"lastName\": \"Test\", \"email\": \"test@test.org\", \"password\": \"PAAssWord\", \"phoneNumber\": \"780-000-0000\", \"dateOfBirth\": \"1991-01-01\"}";
         mvc.perform(MockMvcRequestBuilders.post("/scrub_json")
-                .content(asJsonString(new BusinessData("Test", "Test", "test@test.org", "PAAssWord", "780-000-0000", "1990-01-01")))
+                .content(asJsonString(new BusinessData("Test", "Test", "test@test.org", "2355Ab@kk", "780-000-0000", "1990-01-01")))
                 .characterEncoding("utf-8")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))

@@ -63,7 +63,7 @@ public class JsonInfoController {
                 }
             }
             else if (entry.getKey() == "email") {
-                if (!validateEmail(email)) {
+                if (!validateEmail(entry.getValue())) {
                     errorMessage = "Invalid email!";
                 }
                 else {
@@ -71,15 +71,16 @@ public class JsonInfoController {
                 }
             }
             else if (entry.getKey() == "password") {
-                if (!validateEmail(email)) {
+                if (!validatePassword(entry.getValue())) {
                     errorMessage = "Invalid password!";
+                    System.out.println("Invalid password!");
                 }
                 else {
                     passWord = entry.getValue();
                 }
             }
             else if (entry.getKey() == "phoneNumber") {
-                if (!validateEmail(email)) {
+                if (!validatePhoneNumnber(entry.getValue())) {
                     errorMessage = "Invalid Phone Number!";
                 }
                 else {
